@@ -10,12 +10,8 @@ pipeline{
         }
     }
 	stages{
-	    stage (cleaning) {
-            steps {
-                step([$class: 'WsCleanup'])
-            }
-        }
-	    stage(checkout) {
+	    
+	  stage(checkout) {
             steps {
                     script {
 			def branchName = env.BRANCH_NAME

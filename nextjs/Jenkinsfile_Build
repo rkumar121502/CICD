@@ -17,12 +17,10 @@ pipeline{
         }
 	    stage(checkout) {
             steps {
-                withCredentials([string(credentialsId: 'GITHUB_PAT', variable: 'SECRET')]) {
                     script {
-						            def branchName = env.BRANCH_NAME
-                        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], extensions: [[$class: 'GitLFSPull']], userRemoteConfigs: [[url: "https://$SECRET@github.com/rkumar121502/nextjs.git"]]])
+			def branchName = env.BRANCH_NAME
+                        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], extensions: [[$class: 'GitLFSPull']], userRemoteConfigs: [[url: "https://github.com/rkumar121502/nextjs.git"]]])
                     }
-                }
             }
         }
 		stage(prebuild){

@@ -1,0 +1,48 @@
+def server_name = ['server_ip']
+pipeline {
+    agent any
+    stages {
+        stage('Fetch Docker Image') {
+            steps {
+                script {
+                    // Create a directory to store fetched Docker image
+                    dir('docker_images') {
+                        // Copy Docker image from the upstream job
+                        copyArtifacts(projectName: 'go_lang_build', selector: lastSuccessful(), filter: 'go_lang.tar')
+                    }
+                }
+            }
+        }
+        stage('Load Docker Image') {
+            steps {
+                script {
+                    // Load the Docker image from the tar file
+                    sh 'docker load -i docker_images/go_lang.tar'
+                }
+            }
+        }
+        stage(Deploy) {
+      			environment{
+                  //calling the creds
+      		        login_cred=credentials('jenkinsSetupCreds')	
+      		    }
+            steps{
+                echo "Proceeding with deployment to QA SERVER"
+                script {
+                    server_name.each{
+                        def remote = [:]
+                        remote.name = it
+                        remote.host = it
+                        remote.allowAnyHosts = true
+                        remote.user = "$login_cred_USR"
+                        remote.password = "$login_cred_PSW"
+                        // pushing everything from jenkins workspace to remote server into staging directory
+                        sshPut remote: remote, from: "./", filterRegex : /.$/,  into: "/D:/Staging/"
+                        // running the container out of the image on port 8080 of server IP
+                        sshCommand remote: remote, command: 'docker run -itd -p 8080:8080 --name go_lang go_lang', failOnError: 'true'
+                    }
+                }
+            }
+        }
+    }
+}

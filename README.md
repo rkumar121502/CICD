@@ -34,7 +34,7 @@ On pushing the code to the github repos, corresponding build jobs (`go_lang_buil
 2. Building the dependencies if `prebuild` step is present.  
 3. Will do the Linting, Formatting (in nextjs only) and Unit testing  
 4. Further it will build the code locally, building the Dockerfile to create images and pushing the images to Docker Hub.  
-5. Finally archiving the artifacts means docker image into a tar file so downstream job can use it for deployment.  
+5. Finally archiving the artifacts means converting docker image into a tar file so downstream job can use it for deployment.  
 6. Triggering the downstream deploy jobs  
 
 `Deploy` Jobs will do the following tasks.  
@@ -42,3 +42,5 @@ On pushing the code to the github repos, corresponding build jobs (`go_lang_buil
 2. Loading the docker image from .tar file
 3. Doing ssh to the server, copying the content of worspace into the `Staging` directory and running the docker container on specific ports  
    (3000 for nextjs and 8080 for go_lang)
+
+Note: Here if any step will fail then whole job will fail as per requirements.

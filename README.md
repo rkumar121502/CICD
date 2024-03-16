@@ -18,8 +18,8 @@ Contents:
 
 ## Configuration
 
-1. Create Build Jenkins job using `Jenkins_Build` files (`go_lang_build` and `nextjs_build`) from `go_lang` and `nextjs` directory  
-2. Create Deploy Jenkins job using `Jenkins_Deploy` files (`Deploy_go_lang` and `Deploy_nextjs`) from `go_lang` and `nextjs` directory  
+1. Create Build Jenkins jobs using `Jenkins_Build` files (`go_lang_build` and `nextjs_build`) from `go_lang` and `nextjs` directory  
+2. Create Deploy Jenkins jobs using `Jenkins_Deploy` files (`Deploy_go_lang` and `Deploy_nextjs`) from `go_lang` and `nextjs` directory  
 3. while creating the Build jobs, we need to provide the repository name in the `Github Project` section  
 
 ## Usage

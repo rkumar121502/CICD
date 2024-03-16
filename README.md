@@ -29,7 +29,7 @@ repos and need to place the docker-compose.yml file in the root directory where 
 
 ## Output
 
-On pushing the code to the github repos, corresponding jobs will trigger and do the following tasks:  
+On pushing the code to the github repos, corresponding build jobs (`go_lang_build` and `nextjs_build`) will trigger and do the following tasks:  
 1. Checking out the code  
 2. Building the dependencies if `prebuild` step is present.  
 3. Will do the Linting, Formatting (in nextjs only) and Unit testing  

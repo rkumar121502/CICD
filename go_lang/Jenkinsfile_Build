@@ -1,0 +1,73 @@
+pipeline{
+    agent any
+    tools{
+        go 'go'
+    }
+	options {
+        // Configure GitHub webhook to trigger this pipeline
+        triggers {
+            githubPush()
+        }
+    }
+	stages{
+	    stage (cleaning) {
+            steps {
+                step([$class: 'WsCleanup'])
+            }
+        }
+	    stage(checkout) {
+            steps {
+                    script {
+						            def branchName = env.BRANCH_NAME
+                        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], extensions: [[$class: 'GitLFSPull']], userRemoteConfigs: [[url: "https://github.com/rkumar121502/go_lang.git"]]])
+                    }
+            }
+        }
+    stage(installing_GolangCI-Lint) {
+      steps {
+        sh 'go get -u github.com/golangci/golangci-lint/cmd/golangci-lint'
+      }
+    }
+		stage('Linting') {
+            steps {
+                sh 'golangci-lint run'
+            }
+        }
+        
+        stage('Testing') {
+            steps {
+                // Run Go unit tests here
+                sh 'go test ./...'
+            }
+        }
+        stage(build){
+			steps{
+				sh 'go build -o main .'
+			}
+		}
+		stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build, tag and push your Docker image
+                    sh 'docker build -t go_lang .'
+          					sh 'docker tag go_lang:latest rakes4499/go_lang:latest'
+          					sh 'docker push rakes4499/go_lang:latest'
+                }
+            }
+        }
+		stage('Archive Artifacts') {
+        steps {
+				      script {
+                    // Save the Docker image as a tar file
+                    sh 'docker save -o go_lang.tar rakes4499/go_lang:latest'
+                }
+                archiveArtifacts artifacts: 'go_lang.tar', fingerprint: true
+            }
+        }
+        stage ('Deploy_go_lang_trigger') {
+            steps {
+                build job: "Deploy_go_lang", wait: false
+            }
+        }
+	}
+}

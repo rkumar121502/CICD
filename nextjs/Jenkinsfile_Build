@@ -30,6 +30,7 @@ pipeline{
 				sh 'npm install'
 			}
 		}
+// Enforcing coding standards using ESLint and Prettier
 		 stage('Linting') {
             steps {
                 // Run ESLint for linting

@@ -1,0 +1,22 @@
+services:
+  nextjs:
+    build:
+      context: nextjs
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    ports:
+      - '3000:3000'
+    networks:
+      - appnet
+  go_lang:
+    build:
+      context: go_lang
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - appnet
+networks:
+  appnet:
+    driver: bridge

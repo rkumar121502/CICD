@@ -1,0 +1,80 @@
+pipeline{
+    agent any
+    tools{
+        nodejs 'nodeJs'
+    }
+	options {
+        // Configure GitHub webhook to trigger this pipeline
+        triggers {
+            githubPush()
+        }
+    }
+	stages{
+	    stage (cleaning) {
+            steps {
+                step([$class: 'WsCleanup'])
+            }
+        }
+	    stage(checkout) {
+            steps {
+                withCredentials([string(credentialsId: 'GITHUB_PAT', variable: 'SECRET')]) {
+                    script {
+						            def branchName = env.BRANCH_NAME
+                        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], extensions: [[$class: 'GitLFSPull']], userRemoteConfigs: [[url: "https://$SECRET@github.com/rkumar121502/nextjs.git"]]])
+                    }
+                }
+            }
+        }
+		stage(prebuild){
+			steps{
+				sh 'npm install'
+			}
+		}
+		 stage('Linting') {
+            steps {
+                // Run ESLint for linting
+                sh 'npx eslint . --ext .js,.jsx,.ts,.tsx'
+            }
+        }
+        stage('Formatting') {
+            steps {
+                sh 'npx prettier --check "**/*.js" "**/*.jsx" "**/*.ts" "**/*.tsx"'
+            }
+        }
+        stage('Unit Testing') {
+            steps {
+                // Run unit tests using Jest
+                sh 'npx jest'
+            }
+        }
+        stage(build){
+    			steps{
+    				sh 'npm run build'
+    			}
+		    }
+		    stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build, tag and push your Docker image
+                    sh 'docker build -t nextjs .'
+					sh 'docker tag nextjs:latest rakes4499/nextjs:latest'
+					sh 'docker push rakes4499/nextjs:latest'
+                }
+            }
+        }
+		  stage('Archive Artifacts') {
+            steps {
+				script {
+                    // Save the Docker image as a tar file
+                    sh 'docker save -o nextjs.tar rakes4499/nextjs:latest'
+                }
+                archiveArtifacts artifacts: 'nextjs.tar', fingerprint: true
+            }
+        }
+        stage ('Deploy_nextjs_trigger') {
+            steps {
+                build job: "Deploy_nextjs", wait: false
+            }
+        }
+	  } 
+}
